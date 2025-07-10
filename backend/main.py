@@ -23,7 +23,7 @@ app = FastAPI(
 # --- CORS ---
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+   allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,8 +38,12 @@ app.mount("/metrics", metrics_app)
 # --- Token Auth Middleware ---
 @app.middleware("http")
 async def authenticate_request(request: Request, call_next):
-    public_paths = ["/", "/health"]
-    if request.url.path in public_paths or request.url.path.startswith("/metrics"):
+    # Allow unauthenticated access for these paths:
+    if request.url.path in ["/", "/health", "/metrics"]:
+        return await call_next(request)
+
+    # Let preflight OPTIONS requests pass through for CORS
+    if request.method == "OPTIONS":
         return await call_next(request)
 
     auth_header = request.headers.get("Authorization")
