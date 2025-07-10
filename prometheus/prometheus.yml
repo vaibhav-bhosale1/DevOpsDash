@@ -1,0 +1,16 @@
+# prometheus/prometheus.yml
+# Prometheus configuration file
+
+global:
+  scrape_interval: 15s # How frequently Prometheus will scrape targets
+  evaluation_interval: 15s # How frequently rules are evaluated
+
+# A list of scrape configurations.
+scrape_configs:
+  # Scrape configuration for the FastAPI backend
+  - job_name: 'fastapi_backend' # Name of the job
+    # Use the service name 'backend' as defined in docker-compose.yml
+    # Docker Compose creates a network where services can resolve each other by name.
+    # The backend exposes metrics on port 8000 at the /metrics endpoint.
+    static_configs:
+      - targets: ['backend:8000'] # Target to scrape: 'service_name:port'
