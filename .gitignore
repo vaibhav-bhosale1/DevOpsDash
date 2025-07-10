@@ -41,3 +41,27 @@ backend/.ipynb_checkpoints/
 
 # Docker (if logs or temp files are generated)
 docker-compose.override.yml
+
+
+
+frontend/node_modules/
+frontend/.pnp
+frontend/.pnp.js
+
+frontend/coverage
+
+# production
+frontend/build
+
+
+
+# misc
+frontend/.DS_Store
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+frontend/.env
+
+frontend/npm-debug.log*
+
