@@ -7,8 +7,10 @@ WORKDIR /app
 # Copy dependency files first (for better layer caching)
 COPY package*.json ./
 
+RUN npm config set registry https://registry.npmjs.org/
+
 # Install dependencies
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy all source code
 COPY . .
