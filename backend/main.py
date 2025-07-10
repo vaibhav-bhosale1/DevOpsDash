@@ -38,7 +38,8 @@ app.mount("/metrics", metrics_app)
 # --- Token Auth Middleware ---
 @app.middleware("http")
 async def authenticate_request(request: Request, call_next):
-    if request.url.path == "/metrics":
+    public_paths = ["/", "/health"]
+    if request.url.path in public_paths or request.url.path.startswith("/metrics"):
         return await call_next(request)
 
     auth_header = request.headers.get("Authorization")
@@ -59,6 +60,10 @@ async def authenticate_request(request: Request, call_next):
 @app.get("/")
 async def read_root():
     return {"message": "Welcome to the Cloud Analytics Dashboard Backend!"}
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
 
 @app.get("/api/prices")
 async def get_crypto_prices(request: Request):
@@ -104,7 +109,3 @@ async def get_crypto_prices(request: Request):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Internal error: {e}"
             )
-
-@app.get("/health")
-async def health_check():
-    return {"status": "ok"}
