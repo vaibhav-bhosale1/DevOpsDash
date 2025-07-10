@@ -1,0 +1,43 @@
+# === Python backend (in backend/) ===
+
+# Byte-compiled / optimized / DLL files
+backend/__pycache__/
+backend/*.py[cod]
+backend/*$py.class
+
+# Virtual environment
+backend/venv/
+
+# Environment variables
+.env
+
+# VSCode settings (optional)
+.vscode/
+
+# Logs and process IDs
+*.log
+*.pid
+
+# Testing and coverage
+backend/.pytest_cache/
+backend/.tox/
+backend/coverage/
+backend/htmlcov/
+
+# mypy cache
+backend/.mypy_cache/
+
+# pip and build artifacts
+backend/*.egg-info/
+backend/*.egg/
+backend/dist/
+backend/build/
+
+# Compiled C extensions
+backend/*.so
+
+# Jupyter (if used)
+backend/.ipynb_checkpoints/
+
+# Docker (if logs or temp files are generated)
+docker-compose.override.yml
