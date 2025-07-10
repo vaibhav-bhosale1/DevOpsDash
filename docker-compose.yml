@@ -1,0 +1,97 @@
+# docker-compose.yml
+# This file defines and runs our multi-container Docker application.
+
+version: '3.8' # Specify the Docker Compose file format version
+
+# Define the services (containers) that make up your application
+services:
+
+  # --- Backend Service (FastAPI) ---
+  backend:
+    build: ./backend # Path to the Dockerfile for the backend service
+    container_name: Devopsdashcontainer # Assign a custom name to the container
+    ports:
+      - "8000:8000" # Map host port 8000 to container port 8000 (for direct access/testing, though Nginx will proxy)
+    env_file:
+      - ./backend/.env # Load environment variables from backend/.env file
+    networks:
+      - app_network # Connect to our custom application network
+    restart: always # Always restart the container if it stops
+
+  # --- Frontend Service (React + Nginx) ---
+  frontend:
+    build: ./frontend # Path to the Dockerfile for the frontend service
+    container_name: devopsdashcontainer # Assign a custom name
+    # Frontend will be accessed via the main Nginx reverse proxy, so no direct port mapping needed here
+    # ports:
+    #   - "3000:80" # This would be for direct access, but Nginx will handle it
+    networks:
+      - app_network # Connect to our custom application network
+    restart: always # Always restart the container if it stops
+
+  # --- Nginx Reverse Proxy Service ---
+  nginx:
+    image: nginx:latest # Use the official Nginx image
+    container_name: devopsdashcontainer_nginx # Assign a custom name
+    ports:
+      - "80:80"   # Map host port 80 (HTTP) to container port 80
+      - "443:443" # Map host port 443 (HTTPS) to container port 443
+    volumes:
+      # Mount our custom Nginx configuration file
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      # Mount the Certbot volume for SSL certificates
+      - ./data/certbot/conf:/etc/letsencrypt:rw
+      - ./data/certbot/www:/var/www/certbot:rw
+    depends_on:
+      - backend # Nginx depends on backend being available (for /api proxy)
+      - frontend # Nginx depends on frontend being available (for / proxy)
+    networks:
+      - app_network # Connect to our custom application network
+    restart: always # Always restart the container if it stops
+
+  # --- Prometheus Monitoring Service ---
+  prometheus:
+    image: prom/prometheus:latest # Use the official Prometheus image
+    container_name: devopsdashcontainer_promenthus # Assign a custom name
+    ports:
+      - "9090:9090" # Map host port 9090 to container port 9090 (for Prometheus UI)
+    volumes:
+      # Mount our custom Prometheus configuration file
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      # Persist Prometheus data (optional, but good for production)
+      - prometheus_data:/prometheus
+    command: --config.file=/etc/prometheus/prometheus.yml --web.enable-lifecycle # Specify config file and enable lifecycle for reloads
+    depends_on:
+      - backend # Prometheus needs backend to scrape metrics
+    networks:
+      - app_network # Connect to our custom application network
+    restart: always # Always restart the container if it stops
+
+  # --- Grafana Visualization Service ---
+  grafana:
+    image: grafana/grafana:latest # Use the official Grafana image
+    container_name: devopsdashcontainer_grafana # Assign a custom name
+    ports:
+      - "3000:3000" # Map host port 3000 to container port 3000 (for Grafana UI)
+    volumes:
+      # Persist Grafana data and configurations (dashboards, datasources)
+      - grafana_data:/var/lib/grafana
+      # You can also mount a custom provisioning directory for datasources/dashboards
+      # - ./grafana/provisioning/:/etc/grafana/provisioning/:ro
+    env_file:
+      - ./grafana/.env # Load Grafana environment variables (e.g., admin user/pass)
+    depends_on:
+      - prometheus # Grafana needs Prometheus as a data source
+    networks:
+      - app_network # Connect to our custom application network
+    restart: always # Always restart the container if it stops
+
+# Define custom networks
+networks:
+  app_network:
+    driver: bridge # Use the default bridge network driver
+
+# Define named volumes for data persistence
+volumes:
+  prometheus_data: # Volume for Prometheus data
+  grafana_data:    # Volume for Grafana data and configuration
