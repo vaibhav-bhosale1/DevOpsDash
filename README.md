@@ -1,7 +1,6 @@
 # 🚀 Cloud-Native Analytics Dashboard
 
-A complete production-ready DevOps project featuring a full-stack analytics dashboard with real-time cryptocurrency data, containerization, CI/CD, and monitoring. Perfect for showcasing DevOps skills for companies like MSCI.
-
+A complete production-ready DevOps project featuring a full-stack analytics dashboard with real-time cryptocurrency data, containerization, CI/CD, and monitoring. 
 ## 📋 Table of Contents
 
 - [Project Overview](#project-overview)
